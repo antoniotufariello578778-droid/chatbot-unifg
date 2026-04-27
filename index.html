@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assistente AI - Università di Foggia</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: #003478;
+    color: white;
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  header img {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: white;
+    padding: 5px;
+  }
+
+  header .info h1 {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  header .info p {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+
+  .status {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  .status-dot {
+    width: 10px;
+    height: 10px;
+    background: #4caf50;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+  }
+
+  /* CHAT AREA */
+  #messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .message {
+    display: flex;
+    gap: 10px;
+    max-width: 80%;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .avatar.ai {
+    background: #003478;
+    color: white;
+  }
+
+  .avatar.user {
+    background: #e8f0fe;
+    color: #003478;
+  }
+
+  .bubble {
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 100%;
+  }
+
+  .message.ai .bubble {
+    background: white;
+    color: #1a1a1a;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  .message.user .bubble {
+    background: #003478;
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  .typing .bubble {
+    background: white;
+    padding: 14px 20px;
+  }
+
+  .typing-dots {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .typing-dots span {
+    width: 8px;
+    height: 8px;
+    background: #003478;
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+  }
+
+  /* WELCOME MESSAGE */
+  .welcome {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+  }
+
+  .welcome h2 {
+    color: #003478;
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+
+  .welcome p {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  .suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 15px;
+  }
+
+  .suggestion-btn {
+    background: white;
+    border: 1.5px solid #003478;
+    color: #003478;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+
+  .suggestion-btn:hover {
+    background: #003478;
+    color: white;
+  }
+
+  /* INPUT AREA */
+  .input-area {
+    background: white;
+    padding: 15px 20px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  #question {
+    flex: 1;
+    padding: 12px 18px;
+    border: 1.5px solid #ddd;
+    border-radius: 25px;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.2s;
+  }
+
+  #question:focus {
+    border-color: #003478;
+  }
+
+  #send-btn {
+    width: 45px;
+    height: 45px;
+    background: #003478;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  #send-btn:hover { background: #00255a; }
+  #send-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+  footer {
+    text-align: center;
+    font-size: 11px;
+    color: #aaa;
+    padding: 6px;
+    background: white;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="https://www.unifg.it/themes/custom/unifg/logo.png" 
+       onerror="this.style.display='none'" alt="Logo Unifg">
+  <div class="info">
+    <h1>Assistente Virtuale UniFG</h1>
+    <p>Università degli Studi di Foggia</p>
+  </div>
+  <div class="status">
+    <div class="status-dot"></div>
+    Online
+  </div>
+</header>
+
+<div id="messages">
+  <div class="welcome">
+    <h2>👋 Ciao! Sono il tuo assistente universitario</h2>
+    <p>Posso aiutarti con informazioni su corsi, segreteria, docenti e molto altro.</p>
+    <div class="suggestions">
+      <button class="suggestion-btn" onclick="askSuggestion(this)">Come apro un ticket?</button>
+      <button class="suggestion-btn" onclick="askSuggestion(this)">Contatti dei professori</button>
+      <button class="suggestion-btn" onclick="askSuggestion(this)">Come cambio corso?</button>
+      <button class="suggestion-btn" onclick="askSuggestion(this)">Dove trovo riassunti?</button>
+      <button class="suggestion-btn" onclick="askSuggestion(this)">Come mi iscrivo agli esami?</button>
+      <button class="suggestion-btn" onclick="askSuggestion(this)">Informazioni borse di studio</button>
+    </div>
+  </div>
+</div>
+
+<div class="input-area">
+  <input id="question" type="text" placeholder="Scrivi la tua domanda...">
+  <button id="send-btn" onclick="send()">➤</button>
+</div>
+
+<footer>Assistente AI – Università degli Studi di Foggia &nbsp;|&nbsp; Le risposte sono generate da AI, verifica sempre sul sito ufficiale</footer>
+
+<script>
+function addMessage(text, type) {
+  const messages = document.getElementById("messages");
+  const welcome = messages.querySelector(".welcome");
+  if (welcome) welcome.remove();
+
+  const div = document.createElement("div");
+  div.className = `message ${type}`;
+
+  const avatar = document.createElement("div");
+  avatar.className = `avatar ${type}`;
+  avatar.textContent = type === "ai" ? "AI" : "Tu";
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.innerHTML = text
+      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\n/g, "<br>");
+
+  div.appendChild(avatar);
+  div.appendChild(bubble);
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+  return div;
+}
+
+function addTyping() {
+  const messages = document.getElementById("messages");
+  const div = document.createElement("div");
+  div.className = "message ai typing";
+  div.id = "typing";
+  div.innerHTML = `
+    <div class="avatar ai">AI</div>
+    <div class="bubble">
+      <div class="typing-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>`;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById("typing");
+  if (t) t.remove();
+}
+
+async function send() {
+  const input = document.getElementById("question");
+  const btn = document.getElementById("send-btn");
+  const question = input.value.trim();
+  if (!question) return;
+
+  input.value = "";
+  btn.disabled = true;
+
+  addMessage(question, "user");
+  addTyping();
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: question })
+    });
+
+    const data = await response.json();
+    removeTyping();
+    addMessage(data.response, "ai");
+
+  } catch(err) {
+    removeTyping();
+    addMessage("⚠️ Errore di connessione. Assicurati che il server sia attivo.", "ai");
+  }
+
+  btn.disabled = false;
+  input.focus();
+}
+
+function askSuggestion(btn) {
+  document.getElementById("question").value = btn.textContent;
+  send();
+}
+
+document.getElementById("question").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") send();
+});
+</script>
+
+</body>
+</html>
